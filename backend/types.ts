@@ -1,8 +1,6 @@
-export type Event = {
+export type Persona = {
   id: string;
-  title: string;
-  description: string;
-  date: Date;
-  startHour: number;
-  endHour: number;
+  nombre: string;
+  telefono: string;
+  fecha: Date;
 };

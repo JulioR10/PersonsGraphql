@@ -1,125 +1,84 @@
 import { ObjectId } from "https://deno.land/x/web_bson@v0.2.5/src/objectid.ts";
-import { EventsCollection } from "../db.ts";
+import { PersonCollection } from "../db.ts";
 
 export const Mutation = {
-  createEvent: async (
+  crearPersona: async (
     _: any,
     args: {
-      title: string;
-      description: string;
-      date: Date;
-      startHour: number;
-      endHour: number;
+      nombre: string;
+      telefono: string;
+      fecha: Date;
     }
   ) => {
-    const { title, description, date, startHour, endHour } = args;
-    // check if there is a Event already in that date and time
+    const { nombre, telefono, fecha } = args;
 
-    const event = await EventsCollection.findOne({
-      date: new Date(date),
-      $or: [
-        { startHour: { $gte: startHour, $lte: endHour } },
-        { endHour: { $gte: startHour, $lte: endHour } },
-      ],
-    });
-
-    if (event) {
-      throw new Error("There is already an event in that date and time");
-    }
-
-    const id = await EventsCollection.insertOne({
-      title,
-      description,
-      date: new Date(date),
-      startHour,
-      endHour,
+    const id = await PersonCollection.insertOne({
+      nombre,
+      telefono,
+      fecha: new Date(fecha),
     });
 
     return {
       id: id.toString(),
-      title,
-      description,
-      date: new Date(date),
-      startHour,
-      endHour,
+      nombre,
+      telefono,
+      fecha: new Date(fecha),
     };
   },
 
-  updateEvent: async (
+  actualizarPersona: async (
     _: any,
     args: {
       id: string;
-      title: string;
-      description: string;
-      date: Date;
-      startHour: number;
-      endHour: number;
+      nombre?: string;
+      telefono?: string;
+      fecha?: Date;
     }
   ) => {
-    const { id, title, description, date, startHour, endHour } = args;
-    // check if event exists
-    const event = await EventsCollection.findOne({ _id: new ObjectId(id) });
-    // if not exists 404
-    if (!event) {
-      throw new Error("Event not found");
+    const { id, nombre, telefono, fecha } = args;
+    // Check if person exists
+    const persona = await PersonCollection.findOne({ _id: new ObjectId(id) });
+    // If not exists throw an error
+    if (!persona) {
+      throw new Error("Persona not found");
     }
 
-    // check if there is a Event already in that date and time
-    const eventInSameDate = await EventsCollection.findOne({
-      date: new Date(date),
-      $or: [
-        { startHour: { $gte: startHour, $lte: endHour } },
-        { endHour: { $gte: startHour, $lte: endHour } },
-      ],
-    });
-
-    if (eventInSameDate && eventInSameDate._id.toString() !== id) {
-      throw new Error("There is already an event in that date and time");
-    }
-
-    // update event
-    await EventsCollection.updateOne(
+    // Update person
+    await PersonCollection.updateOne(
       { _id: new ObjectId(id) },
       {
         $set: {
-          title,
-          description,
-          date: new Date(date),
-          startHour,
-          endHour,
+          ...(nombre && { nombre }),
+          ...(telefono && { telefono }),
+          ...(fecha && { fecha: new Date(fecha) }),
         },
       }
     );
 
     return {
       id,
-      title,
-      description,
-      date: new Date(date),
-      startHour,
-      endHour,
+      nombre: nombre || persona.nombre,
+      telefono: telefono || persona.telefono,
+      fecha: fecha ? new Date(fecha) : persona.fecha,
     };
   },
-
-  deleteEvent: async (_: any, args: { id: string }) => {
-    // check if event exists
-    const event = await EventsCollection.findOne({
+  eliminarPersona: async (_: any, args: { id: string }) => {
+    // Check if person exists
+    const persona = await PersonCollection.findOne({
       _id: new ObjectId(args.id),
     });
-    // if not exists 404
-    if (!event) {
-      throw new Error("Event not found");
+    // If not exists throw an error
+    if (!persona) {
+      throw new Error("Persona not found");
     }
-    // delete event
-    await EventsCollection.deleteOne({ _id: new ObjectId(args.id) });
+    // delete person
+    await PersonCollection.deleteOne({ _id: new ObjectId(args.id) });
 
     return {
       id: args.id,
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      startHour: event.startHour,
-      endHour: event.endHour,
+      nombre: persona.nombre,
+      telefono: persona.telefono,
+      fecha: persona.fecha,
     };
   },
 };

@@ -1,37 +1,26 @@
 export const typeDefs = `
   scalar Date
-  
-  type Event {
+
+  type Persona {
     id: ID!
-    title: String!
-    description: String!
-    date: Date!
-    startHour: Int!
-    endHour: Int!
+    nombre: String!
+    telefono: String!
+    fecha: Date!
   }
 
   type Query {
-    events: [Event!]!
+    personas: [Persona]
+    persona(id: ID, nombre: String): Persona
   }
 
   type Mutation {
-    createEvent(
-      title: String!
-      description: String!
-      date: Date!
-      startHour: Int!
-      endHour: Int!
-    ): Event!
-
-    updateEvent(
+    crearPersona(nombre: String!, telefono: String!, fecha: Date!): Persona
+    actualizarPersona(
       id: ID!
-      title: String!
-      description: String!
-      date: Date!
-      startHour: Int!
-      endHour: Int!
-    ): Event!
-
-    deleteEvent(id: ID!): Event!
+      nombre: String!
+      telefono: String!
+      fecha: Date!
+    ): Persona
+    eliminarPersona(id: ID!): Persona
   }
-`;
+  `;
